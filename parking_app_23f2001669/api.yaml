@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: Green Parking App API
+  version: "1.0.0"
+  description: >
+    REST API for eco-friendly parking lot management. Supports admin and user features, including parking lot and reservation management, with green tracking.
+
+servers:
+  - url: /api
+
+paths:
+  /parking_stats:
+    get:
+      summary: Get statistics for all parking lots
+      tags:
+        - Parking Lots
+      responses:
+        '200':
+          description: List of lot statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingLotStats'
+
+  /login:
+    post:
+      summary: User login
+      tags: [Authentication]
+      requestBody:
+        description: Login with username and password
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required: [username, password]
+      responses:
+        '200':
+          description: User/dashboard location or error message
+
+  /register:
+    post:
+      summary: Register new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+              required: [username, password, email]
+      responses:
+        '201':
+          description: User registered
+
+  /add_parking_lot:
+    post:
+      summary: Admin adds new parking lot
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                address: { type: string }
+                pincode: { type: string }
+                price: { type: number, format: float }
+                max_spots: { type: integer }
+                eco_rating: { type: integer }
+                has_solar: { type: boolean }
+                has_ev_charging: { type: boolean }
+                has_recycling: { type: boolean }
+              required:
+                - name
+                - address
+                - pincode
+                - price
+                - max_spots
+      responses:
+        '201':
+          description: Parking lot created
+
+  /book_parking/{lot_id}:
+    post:
+      summary: User books a parking spot in selected lot
+      tags: [User]
+      parameters:
+        - name: lot_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Reservation created
+
+  /checkout/{reservation_id}:
+    post:
+      summary: User checks out from parking spot
+      tags: [User]
+      parameters:
+        - name: reservation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Checkout successful with green stats
+
+components:
+  schemas:
+    ParkingLotStats:
+      type: object
+      properties:
+        name:
+          type: string
+        total_spots:
+          type: integer
+        occupied_spots:
+          type: integer
+        available_spots:
+          type: integer
+

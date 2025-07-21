@@ -1,0 +1,292 @@
+import sqlite3
+from datetime import datetime
+
+# This file creates the parking.db database with all tables and sample data
+# Run this file once to set up your database
+
+DATABASE = 'parking.db'
+
+def create_database():
+    """Create the complete database with all tables and sample data"""
+    
+    print("🌱 Creating Green Parking Database...")
+    
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    
+    # 1. Create Users table with green features
+    print("📋 Creating users table...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            email TEXT NOT NULL,
+            carbon_saved REAL DEFAULT 0,
+            green_points INTEGER DEFAULT 0,
+            badges TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # 2. Create Parking lots table with eco features
+    print("🏢 Creating parking_lots table...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS parking_lots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            address TEXT NOT NULL,
+            pincode TEXT NOT NULL,
+            price REAL NOT NULL,
+            max_spots INTEGER NOT NULL,
+            eco_rating INTEGER DEFAULT 3,
+            has_solar INTEGER DEFAULT 0,
+            has_ev_charging INTEGER DEFAULT 0,
+            has_recycling INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # 3. Create Parking spots table with types
+    print("🚗 Creating parking_spots table...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS parking_spots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lot_id INTEGER NOT NULL,
+            spot_number INTEGER NOT NULL,
+            status TEXT DEFAULT 'A',
+            spot_type TEXT DEFAULT 'car',
+            FOREIGN KEY (lot_id) REFERENCES parking_lots (id)
+        )
+    ''')
+    
+    # 4. Create Reservations table with green tracking
+    print("📝 Creating reservations table...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reservations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            spot_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            parking_timestamp DATETIME,
+            leaving_timestamp DATETIME,
+            cost REAL,
+            carbon_saved REAL DEFAULT 0,
+            green_points_earned INTEGER DEFAULT 0,
+            FOREIGN KEY (spot_id) REFERENCES parking_spots (id),
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # 5. Create Eco tips table
+    print("🌿 Creating eco_tips table...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS eco_tips (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tip_text TEXT NOT NULL,
+            category TEXT NOT NULL
+        )
+    ''')
+    
+    # 6. Create admin user (always exists)
+    print("👨‍💼 Creating admin user...")
+    cursor.execute('SELECT * FROM users WHERE username = "admin"')
+    if not cursor.fetchone():
+        cursor.execute('''
+            INSERT INTO users (username, password, email, green_points, badges) 
+            VALUES (?, ?, ?, ?, ?)
+        ''', ('admin', 'admin123', 'admin@greenparking.com', 1000, 'Super Admin,Eco Champion'))
+        print("✅ Admin user created (username: admin, password: admin123)")
+    else:
+        print("✅ Admin user already exists")
+    
+    # 7. Add sample eco tips
+    print("💡 Adding eco tips...")
+    sample_tips = [
+        ('Walk or bike short distances instead of driving to reduce carbon footprint!', 'transport'),
+        ('Choose parking spots with solar panels to support renewable energy!', 'energy'),
+        ('Carpool with friends to reduce emissions and earn bonus green points!', 'transport'),
+        ('Always use recycling bins available in eco-friendly parking lots!', 'waste'),
+        ('Turn off your engine while waiting to reduce air pollution!', 'air'),
+        ('Plant a tree with your earned green points to offset carbon emissions!', 'nature'),
+        ('Use public transport when possible to reduce overall vehicle emissions!', 'transport'),
+        ('Keep your vehicle well-maintained to improve fuel efficiency!', 'maintenance'),
+        ('Choose electric or hybrid vehicles to reduce your carbon footprint!', 'vehicle'),
+        ('Share rides with colleagues to reduce the number of cars on the road!', 'transport')
+    ]
+    
+    tip_count = 0
+    for tip in sample_tips:
+        cursor.execute('SELECT * FROM eco_tips WHERE tip_text = ?', (tip[0],))
+        if not cursor.fetchone():
+            cursor.execute('INSERT INTO eco_tips (tip_text, category) VALUES (?, ?)', tip)
+            tip_count += 1
+    
+    print(f"✅ Added {tip_count} eco tips")
+    
+    # 8. Add sample parking lots
+    print("🏗️ Creating sample parking lots...")
+    sample_lots = [
+        ('Green Mall Parking', 'Main Street, City Center', '110001', 50.0, 20, 5, 1, 1, 1),
+        ('Eco Business Park', 'Tech Hub, Downtown', '110002', 75.0, 30, 4, 1, 1, 0),
+        ('Solar Plaza Parking', 'Shopping District', '110003', 60.0, 25, 5, 1, 0, 1),
+        ('Nature Center Parking', 'Green Valley Area', '110004', 40.0, 15, 3, 0, 1, 1),
+        ('Sustainable Tower', 'Corporate Avenue', '110005', 80.0, 35, 4, 1, 1, 1)
+    ]
+    
+    lot_count = 0
+    for lot in sample_lots:
+        cursor.execute('SELECT * FROM parking_lots WHERE name = ?', (lot[0],))
+        if not cursor.fetchone():
+            cursor.execute('''
+                INSERT INTO parking_lots (name, address, pincode, price, max_spots, eco_rating, 
+                                        has_solar, has_ev_charging, has_recycling) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', lot)
+            
+            lot_id = cursor.lastrowid
+            lot_count += 1
+            
+            # Create parking spots for this lot
+            max_spots = lot[4]
+            for i in range(1, max_spots + 1):
+                # First 10% spots for bikes, 20% for EVs, rest for cars
+                if i <= max_spots * 0.1:
+                    spot_type = 'bike'
+                elif i <= max_spots * 0.3:
+                    spot_type = 'ev'
+                else:
+                    spot_type = 'car'
+                
+                cursor.execute('INSERT INTO parking_spots (lot_id, spot_number, spot_type) VALUES (?, ?, ?)',
+                              (lot_id, i, spot_type))
+    
+    print(f"✅ Created {lot_count} parking lots with all spots")
+    
+    # 9. Add sample users
+    print("👥 Creating sample users...")
+    sample_users = [
+        ('john_doe', 'password123', 'john@email.com', 2.5, 250, 'Eco Warrior'),
+        ('jane_smith', 'password123', 'jane@email.com', 5.2, 520, 'Eco Warrior,Green Champion'),
+        ('mike_green', 'password123', 'mike@email.com', 1.8, 180, 'Eco Warrior'),
+        ('sara_eco', 'password123', 'sara@email.com', 8.1, 810, 'Eco Warrior,Green Champion'),
+        ('tom_nature', 'password123', 'tom@email.com', 0.5, 50, '')
+    ]
+    
+    user_count = 0
+    for user in sample_users:
+        cursor.execute('SELECT * FROM users WHERE username = ?', (user[0],))
+        if not cursor.fetchone():
+            cursor.execute('''
+                INSERT INTO users (username, password, email, carbon_saved, green_points, badges) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', user)
+            user_count += 1
+    
+    print(f"✅ Created {user_count} sample users")
+    
+    # 10. Add sample reservations (some completed, some active)
+    print("📋 Creating sample reservations...")
+    cursor.execute('SELECT id FROM users WHERE username != "admin" LIMIT 3')
+    user_ids = [row[0] for row in cursor.fetchall()]
+    
+    cursor.execute('SELECT id FROM parking_spots LIMIT 5')
+    spot_ids = [row[0] for row in cursor.fetchall()]
+    
+    # Add completed reservations
+    sample_reservations = [
+        (spot_ids[0], user_ids[0], '2024-01-15 09:00:00', '2024-01-15 12:00:00', 150.0, 0.3, 30),
+        (spot_ids[1], user_ids[1], '2024-01-16 14:00:00', '2024-01-16 18:00:00', 200.0, 0.4, 40),
+        (spot_ids[2], user_ids[2], '2024-01-17 10:00:00', '2024-01-17 11:30:00', 75.0, 0.15, 15),
+    ]
+    
+    reservation_count = 0
+    for res in sample_reservations:
+        cursor.execute('''
+            INSERT INTO reservations (spot_id, user_id, parking_timestamp, leaving_timestamp, 
+                                    cost, carbon_saved, green_points_earned) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', res)
+        reservation_count += 1
+    
+    print(f"✅ Created {reservation_count} sample reservations")
+    
+    # Commit all changes
+    conn.commit()
+    conn.close()
+    
+    print("\n🎉 Database created successfully!")
+    print("📊 Database Summary:")
+    print("   - Users table with green tracking")
+    print("   - Parking lots with eco features")
+    print("   - Parking spots with different types (car/bike/ev)")
+    print("   - Reservations with carbon savings")
+    print("   - Eco tips for sustainability")
+    print("   - Sample data for testing")
+    print("\n🔑 Admin Login:")
+    print("   Username: admin")
+    print("   Password: admin123")
+    print("\n👤 Sample User Logins:")
+    print("   Username: john_doe, Password: password123")
+    print("   Username: jane_smith, Password: password123")
+    print("   Username: mike_green, Password: password123")
+    print("\n🚀 Your database is ready! Run app.py to start the server.")
+
+def view_database_info():
+    """View information about the created database"""
+    try:
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        
+        print("\n📊 Database Information:")
+        print("=" * 50)
+        
+        # Count users
+        cursor.execute('SELECT COUNT(*) FROM users')
+        user_count = cursor.fetchone()[0]
+        print(f"👥 Total Users: {user_count}")
+        
+        # Count parking lots
+        cursor.execute('SELECT COUNT(*) FROM parking_lots')
+        lot_count = cursor.fetchone()[0]
+        print(f"🏢 Total Parking Lots: {lot_count}")
+        
+        # Count parking spots
+        cursor.execute('SELECT COUNT(*) FROM parking_spots')
+        spot_count = cursor.fetchone()[0]
+        print(f"🚗 Total Parking Spots: {spot_count}")
+        
+        # Count reservations
+        cursor.execute('SELECT COUNT(*) FROM reservations')
+        reservation_count = cursor.fetchone()[0]
+        print(f"📝 Total Reservations: {reservation_count}")
+        
+        # Count eco tips
+        cursor.execute('SELECT COUNT(*) FROM eco_tips')
+        tip_count = cursor.fetchone()[0]
+        print(f"💡 Total Eco Tips: {tip_count}")
+        
+        # Show eco stats
+        cursor.execute('SELECT SUM(carbon_saved), SUM(green_points) FROM users')
+        carbon_total, points_total = cursor.fetchone()
+        print(f"🌱 Total Carbon Saved: {carbon_total or 0} kg")
+        print(f"🏆 Total Green Points: {points_total or 0}")
+        
+        conn.close()
+        
+    except sqlite3.Error as e:
+        print(f"❌ Database error: {e}")
+
+if __name__ == "__main__":
+    # Create the database
+    create_database()
+    
+    # Show database info
+    view_database_info()
+    
+    print("\n" + "="*50)
+    print("🎯 Next Steps:")
+    print("1. Run this file: python database.py")
+    print("2. Then run your app: python app.py")
+    print("3. Open browser: http://localhost:5000")
+    print("4. Login with admin/admin123 or sample users")
+    print("="*50)

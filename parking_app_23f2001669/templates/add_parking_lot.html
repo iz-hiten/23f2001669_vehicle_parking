@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Parking Lot - Green Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <h1>🌱 Green Parking Admin</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>🏢 Add New Parking Lot</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="alert">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="add-lot-form">
+                <div class="form-group">
+                    <label for="name">Parking Lot Name *</label>
+                    <input type="text" id="name" name="name" placeholder="Enter parking lot name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pincode">Pin Code *</label>
+                        <input type="text" id="pincode" name="pincode" placeholder="Enter pin code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price per Hour (₹) *</label>
+                        <input type="number" id="price" name="price" step="0.01" placeholder="Enter price" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address *</label>
+                    <textarea id="address" name="address" rows="3" placeholder="Enter full address" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="max_spots">Maximum Parking Spots *</label>
+                        <input type="number" id="max_spots" name="max_spots" min="1" placeholder="Enter number of spots" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eco_rating">Eco Rating (1-5 stars) *</label>
+                        <select id="eco_rating" name="eco_rating" required>
+                            <option value="">Select eco rating</option>
+                            <option value="1">⭐ Basic (1 star)</option>
+                            <option value="2">⭐⭐ Fair (2 stars)</option>
+                            <option value="3">⭐⭐⭐ Good (3 stars)</option>
+                            <option value="4">⭐⭐⭐⭐ Very Good (4 stars)</option>
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent (5 stars)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="eco-features-section">
+                    <h3>Green Features 🌱</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_solar">
+                            <span class="checkmark"></span>
+                            ☀️ Solar Panels
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_ev_charging">
+                            <span class="checkmark"></span>
+                            🔋 EV Charging Stations
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_recycling">
+                            <span class="checkmark"></span>
+                            ♻️ Recycling Bins
+                        </label>
+                    </div>
+                </div>
+
+                <div class="alert" style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">
+                    <strong>Info:</strong> Parking spots will be automatically created based on the maximum number you specify.
+                    10% will be bike spots, 20% EV spots, and 70% car spots.
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">🌿 Create Parking Lot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

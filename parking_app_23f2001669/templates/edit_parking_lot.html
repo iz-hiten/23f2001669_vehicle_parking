@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Parking Lot - Green Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <h1>🌱 Green Parking Admin</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>🏢 Edit Parking Lot</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="alert">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="add-lot-form">
+                <div class="form-group">
+                    <label for="name">Parking Lot Name *</label>
+                    <input type="text" id="name" name="name" value="{{ lot[1] }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pincode">Pin Code *</label>
+                        <input type="text" id="pincode" name="pincode" value="{{ lot[3] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price per Hour (₹) *</label>
+                        <input type="number" id="price" name="price" step="0.01" value="{{ lot[4] }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address *</label>
+                    <textarea id="address" name="address" rows="3" required>{{ lot[2] }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="eco_rating">Eco Rating (1-5 stars) *</label>
+                    <select id="eco_rating" name="eco_rating" required>
+                        <option value="1" {% if lot[6] == 1 %}selected{% endif %}>⭐ Basic (1 star)</option>
+                        <option value="2" {% if lot[6] == 2 %}selected{% endif %}>⭐⭐ Fair (2 stars)</option>
+                        <option value="3" {% if lot[6] == 3 %}selected{% endif %}>⭐⭐⭐ Good (3 stars)</option>
+                        <option value="4" {% if lot[6] == 4 %}selected{% endif %}>⭐⭐⭐⭐ Very Good (4 stars)</option>
+                        <option value="5" {% if lot[6] == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ Excellent (5 stars)</option>
+                    </select>
+                </div>
+
+                <div class="eco-features-section">
+                    <h3>Green Features 🌱</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_solar" {% if lot[7] %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            ☀️ Solar Panels
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_ev_charging" {% if lot[8] %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            🔋 EV Charging
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="has_recycling" {% if lot[9] %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            ♻️ Recycling Bins
+                        </label>
+                    </div>
+                </div>
+
+                <div class="alert" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">
+                    <strong>Note:</strong> You cannot change the number of parking spots after creation. 
+                    If you need to modify spot count, please delete and recreate the parking lot.
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">🌿 Update Parking Lot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

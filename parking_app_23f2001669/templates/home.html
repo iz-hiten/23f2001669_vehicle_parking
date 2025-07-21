@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Parking - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <h1>🌱 Green Parking</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="eco-tip-banner">
+            <h2>Welcome to Green Parking!</h2>
+            <p>
+                Sustainable, eco-friendly parking for a greener tomorrow.<br>
+                Earn green points, save CO₂, and unlock eco badges every time you park!
+            </p>
+        </section>
+
+        <div class="section">
+            <h2>Why Choose Green Parking?</h2>
+            <ul>
+                <li>🌱 <strong>Eco-friendly lots</strong> with solar panels, EV charging, and recycling bins</li>
+                <li>🌱 <strong>Earn green points</strong> and badges for sustainable parking</li>
+                <li>🌱 <strong>Special spots</strong> for bikes, EVs, and cars</li>
+                <li>🌱 <strong>Track your carbon savings</strong> and parking history</li>
+                <li>🌱 <strong>Get daily eco-tips</strong> and help the environment</li>
+            </ul>
+        </div>
+
+        <div class="section" style="text-align:center;">
+            <a href="{{ url_for('login') }}" class="btn-primary" style="margin-right: 1rem;">Login</a>
+            <a href="{{ url_for('register') }}" class="btn-secondary">Register</a>
+        </div>
+    </div>
+</body>
+</html>

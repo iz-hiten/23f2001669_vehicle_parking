@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Parking App - User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .hero-user {
+            background: linear-gradient(120deg, #4CAF50 60%, #667eea 100%);
+            color: #fff;
+            border-radius: 18px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .user-mascot {
+            position: absolute;
+            right: 2rem;
+            bottom: 0;
+            width: 110px;
+            opacity: 0.13;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #e8f5e8 60%, #f0f8ff 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(76,175,80,0.08);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 8px 32px rgba(76,175,80,0.15);
+        }
+        .stat-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .eco-tip-card {
+            background: linear-gradient(90deg, #e0ffe0 60%, #e0f7fa 100%);
+            border-radius: 14px;
+            padding: 1.2rem 1rem;
+            box-shadow: 0 2px 8px rgba(76,175,80,0.07);
+            margin-bottom: 1rem;
+        }
+        .lot-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(76,175,80,0.07);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .lot-card:hover {
+            box-shadow: 0 8px 24px rgba(76,175,80,0.15);
+            transform: scale(1.02);
+        }
+        .badge.bg-primary {
+            background: linear-gradient(90deg, #667eea 60%, #4CAF50 100%);
+        }
+        .footer-user {
+            margin-top: 3rem;
+            padding: 1.5rem 0 0.5rem 0;
+            text-align: center;
+            color: #888;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body class="green-bg">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">🌱 Green Parking</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Welcome, {{ session.username }}! 🌿 {{ user[5] }} points
+                </span>
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="hero-user mb-4 position-relative">
+            <div>
+                <h1 class="display-6 fw-bold mb-2">🚗 Welcome, {{ session.username }}!</h1>
+                <p class="lead mb-0">This is your green journey dashboard.<br>
+                <span style="font-size:1.1rem;">Track your eco impact, earn rewards, and park smarter every day!</span></p>
+            </div>
+            <svg class="user-mascot" viewBox="0 0 120 120" fill="none">
+                <ellipse cx="60" cy="70" rx="35" ry="40" fill="#4CAF50"/>
+                <ellipse cx="60" cy="60" rx="25" ry="28" fill="#fff"/>
+                <ellipse cx="60" cy="65" rx="18" ry="20" fill="#4CAF50"/>
+                <ellipse cx="60" cy="70" rx="10" ry="12" fill="#fff"/>
+                <ellipse cx="50" cy="60" rx="3" ry="4" fill="#333"/>
+                <ellipse cx="70" cy="60" rx="3" ry="4" fill="#333"/>
+                <ellipse cx="60" cy="75" rx="6" ry="2" fill="#333"/>
+            </svg>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">🌱</div>
+                    <div class="stat-number">{{ user[5] }}</div>
+                    <div class="stat-label">Green Points</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">🌍</div>
+                    <div class="stat-number">{{ "%.2f"|format(user[4]) }}</div>
+                    <div class="stat-label">kg CO₂ Saved</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-number">{{ user[6].count(',') + 1 if user[6] else 0 }}</div>
+                    <div class="stat-label">Badges Earned</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-number">{{ history|length }}</div>
+                    <div class="stat-label">Total Parkings</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="eco-tip-card">
+                    <h6>💡 Today's Eco Tip</h6>
+                    <p>{{ eco_tip }}</p>
+                </div>
+            </div>
+        </div>
+        {% if user[6] %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🏆 Your Badges</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for badge in user[6].split(',') %}
+                            {% if badge %}
+                                <span class="badge bg-primary me-2 mb-2">{{ badge }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🚗 Current Parking</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_reservations %}
+                            {% for reservation in current_reservations %}
+                            <div class="alert alert-info">
+                                <h6>📍 {{ reservation[11] }}</h6>
+                                <p><strong>Spot:</strong> #{{ reservation[12] }} ({{ reservation[13]|title }} spot)</p>
+                                <p><strong>Parked since:</strong> {{ reservation[3][:19] }}</p>
+                                <a href="{{ url_for('checkout', reservation_id=reservation[0]) }}" 
+                                   class="btn btn-warning">
+                                    🚪 Check Out & Earn Green Points
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p>No current parking reservations.</p>
+                                <p>Book a spot below to start earning green points!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🏢 Available Parking Lots</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if lots %}
+                            <div class="row">
+                                {% for lot in lots %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="lot-card">
+                                        <h6>{{ lot[1] }}</h6>
+                                        <p><strong>📍 Address:</strong> {{ lot[2] }}</p>
+                                        <p><strong>💰 Price:</strong> ₹{{ lot[4] }}/hour</p>
+                                        <p><strong>🌟 Eco Rating:</strong> 
+                                            {% for i in range(lot[6]) %}⭐{% endfor %}
+                                        </p>
+                                        <p><strong>🌱 Green Features:</strong>
+                                            {% if lot[7] %}☀️ Solar {% endif %}
+                                            {% if lot[8] %}🔋 EV Charging {% endif %}
+                                            {% if lot[9] %}♻️ Recycling{% endif %}
+                                        </p>
+                                        <a href="{{ url_for('book_parking', lot_id=lot[0]) }}" 
+                                           class="btn btn-success">
+                                            🚗 Book Parking
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p>No parking lots available at the moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📊 Recent Parking History</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if history %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Parking Lot</th>
+                                            <th>Spot</th>
+                                            <th>Type</th>
+                                            <th>Duration</th>
+                                            <th>Cost</th>
+                                            <th>CO₂ Saved</th>
+                                            <th>Points Earned</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in history %}
+                                        <tr>
+                                            <td>{{ record[8] }}</td>
+                                            <td>#{{ record[9] }}</td>
+                                            <td>{{ record[10]|title }}</td>
+                                            <td>
+                                                {% set duration = (record[4][:19] | strptime('%Y-%m-%d %H:%M:%S')) - (record[3][:19] | strptime('%Y-%m-%d %H:%M:%S')) %}
+                                                {{ duration.total_seconds() // 3600 }}h {{ (duration.total_seconds() % 3600) // 60 }}m
+                                            </td>
+                                            <td>₹{{ "%.2f"|format(record[5]) }}</td>
+                                            <td>{{ "%.2f"|format(record[6]) }}kg</td>
+                                            <td>{{ record[7] }} 🌱</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p>No parking history yet.</p>
+                                <p>Book your first parking spot to start building your green profile!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-user">
+        <hr>
+        <div>
+            <span>🌱 Green Parking User Dashboard &copy; {{ current_year }} | Park smart, live green!</span>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
